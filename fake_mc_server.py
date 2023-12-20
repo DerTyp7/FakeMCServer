@@ -5,7 +5,7 @@ import logging
 import base64
 import os.path
 
-from socket_server import SocketServer
+from FakeMCServer.socket_server import SocketServer
 
 
 class FakeMCServer:

@@ -3,7 +3,7 @@ import socket
 import uuid
 from threading import Thread
 
-import byte_utils
+import FakeMCServer.byte_utils as byte_utils
 
 
 class SocketServer:
@@ -38,7 +38,8 @@ class SocketServer:
                 (version, i) = byte_utils.read_varint(data, i)
                 (ip, i) = byte_utils.read_utf(data, i)
 
-                ip = ip.replace('\x00', '').replace("\r", "\\r").replace("\t", "\\t").replace("\n", "\\n")
+                ip = ip.replace('\x00', '').replace("\r", "\\r").replace(
+                    "\t", "\\t").replace("\n", "\\n")
                 is_using_fml = False
 
                 if ip.endswith("FML"):
@@ -61,7 +62,8 @@ class SocketServer:
                     motd["players"]["sample"] = []
 
                     for sample in self.samples:
-                        motd["players"]["sample"].append({"name": sample, "id": str(uuid.uuid4())})
+                        motd["players"]["sample"].append(
+                            {"name": sample, "id": str(uuid.uuid4())})
 
                     motd["description"] = {"text": self.motd}
 
@@ -79,7 +81,8 @@ class SocketServer:
                         ("[%s:%s] " + (name + " t" if len(name) > 0 else "T") + "ries to connect to the server " +
                          ("(using ForgeModLoader) " if is_using_fml else "") + "(%s:%s).")
                         % (client_ip, addr[1], ip, port))
-                    self.write_response(client_socket, json.dumps({"text": self.kick_message}))
+                    self.write_response(client_socket, json.dumps(
+                        {"text": self.kick_message}))
                 else:
                     self.logger.info(
                         "[%s:%d] Tried to request a login/ping with an unknown state: %d" % (client_ip, addr[1], state))
@@ -90,11 +93,14 @@ class SocketServer:
                 byte_utils.write_varint(response, 1)
                 bytearray.append(long)
                 client_socket.sendall(bytearray)
-                self.logger.info("[%s:%d] Responded with pong packet." % (client_ip, addr[1]))
+                self.logger.info(
+                    "[%s:%d] Responded with pong packet." % (client_ip, addr[1]))
             else:
-                self.logger.warning("[%s:%d] Sent an unexpected packet: %d" % (client_ip, addr[1], packetID))
+                self.logger.warning("[%s:%d] Sent an unexpected packet: %d" % (
+                    client_ip, addr[1], packetID))
         except (TypeError, IndexError):
-            self.logger.warning("[%s:%s] Received invalid data (%s)" % (client_ip, addr[1], data))
+            self.logger.warning(
+                "[%s:%s] Received invalid data (%s)" % (client_ip, addr[1], data))
             return
 
     def write_response(self, client_socket, response):
@@ -111,14 +117,16 @@ class SocketServer:
         self.sock.bind((self.ip, self.port))
         self.sock.settimeout(5)
         self.sock.listen(30)
-        self.logger.info("Server started on %s:%s! Waiting for incoming connections..." % (self.ip, self.port))
+        self.logger.info("Server started on %s:%s! Waiting for incoming connections..." % (
+            self.ip, self.port))
         while 1:
             try:
                 (client, address) = self.sock.accept()
             except socket.timeout:
                 continue  # timeouts may occur but shouldn't worry uns server-side
-            
-            Thread(target=self.on_new_client, daemon=True, args=(client, address,)).start()
+
+            Thread(target=self.on_new_client, daemon=True,
+                   args=(client, address,)).start()
 
     def close(self):
         self.sock.close()
