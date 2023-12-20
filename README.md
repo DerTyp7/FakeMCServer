@@ -6,6 +6,12 @@ This program creates a simple Minecraft protocol wrapper, which imitates a full 
 
 ![Overview](https://raw.githubusercontent.com/ZockerSK/FakeMCServerImages/main/overview.png)
 
+- [FakeMCServer (object-oriented)](#fakemcserver-object-oriented)
+  - [Usage](#usage)
+  - [Parameters](#parameters)
+  - [Other information](#other-information)
+  - [Contribution](#contribution)
+
 ## Usage
 
 You can start this program by using
@@ -13,12 +19,21 @@ You can start this program by using
 1. Clone this repository in your project repository
 2. Use the example code below
 
-Example usage:
+Example usage 1:
 
 ```python
 from FakeMCServer import FakeMCServer
 
 server = FakeMCServer()
+server.start_server()
+```
+
+Example usage 2:
+
+```python
+from FakeMCServer import FakeMCServer
+
+server = FakeMCServer(motd={"1": "§4Maintenance!", "2": "§aCheck example.com for more information!")
 server.start_server()
 ```
 
