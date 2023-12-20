@@ -1,42 +1,45 @@
-# FakeMCServer
+# FakeMCServer (object-oriented)
 
-This program creates a simple Minecraft protocol wrapper, which imitates a full Minecraft server. This can be used to respond to pings with some information provided without the need to start a (Java) server.
+> This is a fork of [FakeMCServer](https://github.com/ZockerSK/FakeMCServer). I forked it because I wanted to make it object-oriented, so that it is easier to use in other projects.
+
+This program creates a simple Minecraft protocol wrapper, which imitates a full Minecraft server. This can be used to respond to pings with some information provided without the need to **start** a (Java) server.
 
 ![Overview](https://raw.githubusercontent.com/ZockerSK/FakeMCServerImages/main/overview.png)
 
+## Usage
+
 You can start this program by using
-```
-$ python3 main.py
+
+1. Clone this repository in your project repository
+2. Use the example code below
+
+Example usage:
+
+```python
+from FakeMCServer import FakeMCServer
+
+server = FakeMCServer()
+server.start_server()
 ```
 
-Example configuration:
-```json
-{
-    "ip": "0.0.0.0",
-    "kick_message": [
-        "§bSorry",
-        "",
-        "§aThis server is offline!"
-    ],
-    "motd": {
-        "1": "§4Maintenance!",
-        "2": "§aCheck example.com for more information!"
-    },
-    "port": 25565,
-    "protocol": 2,
-    "samples": [
-        "§bexample.com",
-        "",
-        "§4Maintenance"
-    ],
-    "server_icon": "server_icon.png",
-    "show_hostname_if_available": true,
-    "show_ip_if_hostname_available": true,
-    "version_text": "§4Maintenance",
-    "player_max": 0,
-    "player_online": 0
-}
-```
+## Parameters
+
+| Parameter                    | Type | Default Value                                                             | Description                                            |
+| ---------------------------- | ---- | ------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `ip`                         | str  | "0.0.0.0"                                                                 | The IP address the server should bind to.              |
+| `port`                       | int  | 25565                                                                     | The port the server should listen on.                  |
+| `motd`                       | dict | {"1": "§4Maintenance!", "2": "§aCheck example.com for more information!"} | The Message of the Day displayed to clients.           |
+| `version_text`               | str  | "§4Maintenance"                                                           | The version text displayed to clients.                 |
+| `kick_message`               | list | ["§bSorry", "", "§aThis server is offline!"]                              | The message displayed to clients when they are kicked. |
+| `server_icon`                | str  | "server_icon.png"                                                         | The path to the server icon file.                      |
+| `samples`                    | list | ["§bexample.com", "", "§4Maintenance"]                                    | The samples displayed to clients.                      |
+| `show_hostname_if_available` | bool | True                                                                      | Whether to show the hostname if it's available.        |
+| `player_max`                 | int  | 0                                                                         | The maximum number of players allowed on the server.   |
+| `player_online`              | int  | 0                                                                         | The number of players currently online.                |
+| `protocol`                   | int  | 2                                                                         | The protocol version used by the server.               |
+
+## Other information
+
 Please note, that the `server_icon` **must** be 64x64 and a png file.
 
 In this configuration you can use typical Minecraft message formatting tags.
@@ -50,4 +53,6 @@ In this configuration you can use typical Minecraft message formatting tags.
 ![Samples](https://raw.githubusercontent.com/ZockerSK/FakeMCServerImages/main/samples.png)
 
 ## Contribution
+
 If you find some issues or encounter problems, feel free to write an issue providing your problem and some information regarding your setup (like Minecraft version, python version, ...).
+This goes for this fork as well as for the original repository.
