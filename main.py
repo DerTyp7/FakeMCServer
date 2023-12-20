@@ -3,94 +3,72 @@
 
 import logging
 import base64
-import json
 import os.path
 
 from socket_server import SocketServer
 
-server = None
 
+class FakeMCServer:
+    def __init__(self, ip: str = "0.0.0.0",
+                 port: int = 25565, motd: dict = {"1": "§4Maintenance!", "2": "§aCheck example.com for more information!"},
+                 version_text: str = "§4Maintenance", kick_message: list = ["§bSorry", "", "§aThis server is offline!"],
+                 server_icon: str = "server_icon.png", samples: list = ["§bexample.com", "", "§4Maintenance"], show_hostname_if_available: bool = True,
+                 player_max: int = 0, player_online: int = 0, protocol: int = 2):
+        self.logger = logging.getLogger("FakeMCServer")
+        if not os.path.exists("logs"):
+            os.makedirs("logs")
+        self.logger.setLevel(logging.INFO)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        file_handler = logging.FileHandler("logs/access.log")
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+        self.logger.addHandler(file_handler)
 
-def main():
-    logger = logging.getLogger("FakeMCServer")
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
-    logger.setLevel(logging.INFO)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    file_handler = logging.FileHandler("logs/access.log")
-    file_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
-    if os.path.exists("config.json"):
-        logger.info("Loading configuration...")
-        with open("config.json", 'r') as file:
-            configuration = json.load(file)
+        self.ip = ip
+        self.port = port
+        self.motd = motd["1"] + "\n" + motd["2"]
+        self.version_text = version_text
+        self.kick_message = ""
+        self.samples = samples
+        self.show_hostname = show_hostname_if_available
+        self.player_max = player_max
+        self.player_online = player_online
+        self.protocol = protocol
+        self.server_icon = None
 
-        ip = configuration["ip"]
-        port = configuration["port"]
-        motd = configuration["motd"]["1"] + "\n" + configuration["motd"]["2"]
-        version_text = configuration["version_text"]
-        kick_message = ""
-        samples = configuration["samples"]
-        try:
-            show_hostname = configuration["show_hostname_if_available"]
-        except KeyError:
-            configuration["show_hostname_if_available"] = True
-            show_hostname = True
-            with open("config.json", 'w') as file:
-                json.dump(configuration, file, sort_keys=True, indent=4, ensure_ascii=False)
+        for message in kick_message:
+            self.kick_message += message + "\n"
 
-        player_max = configuration.get("player_max", 0)
-        player_online = configuration.get("player_online", 0)
-        protocol = configuration.get("protocol", 2)
-        server_icon = None
-
-        for message in configuration["kick_message"]:
-            kick_message += message + "\n"
-
-        if not os.path.exists(configuration["server_icon"]):
-            logger.warning("Server icon doesn't exists - submitting none...")
+        if not os.path.exists(server_icon):
+            self.logger.warning(
+                "Server icon doesn't exist - submitting none...")
         else:
-            with open(configuration["server_icon"], 'rb') as image:
-                server_icon = "data:image/png;base64," + base64.b64encode(image.read()).decode()
+            with open(server_icon, 'rb') as image:
+                self.server_icon = "data:image/png;base64," + \
+                    base64.b64encode(image.read()).decode()
+
+    def start_server(self):
         try:
-            global server
-            logger.info("Setting up server...")
-            server = SocketServer(ip, port, motd, version_text, kick_message, samples, server_icon, logger, show_hostname, player_max, player_online, protocol)
-            server.start()
+            self.logger.info("Setting up server...")
+            self.server = SocketServer(self.ip, self.port, self.motd, self.version_text, self.kick_message, self.samples,
+                                       self.server_icon, self.logger, self.show_hostname, self.player_max, self.player_online, self.protocol)
+            self.server.start()
         except KeyboardInterrupt:
-            logger.info("Shutting down server...")
-            server.close()
-            logger.info("Done. Thanks for using FakeMCServer!")
+            self.logger.info("Shutting down server...")
+            self.server.close()
+            self.logger.info("Done. Thanks for using FakeMCServer!")
             exit(0)
         except Exception as e:
-            logger.exception(e)
-    else:
-        logger.warning("No configuration file found. Creating config.json...")
-        configuration = {}
-        configuration["ip"] = "0.0.0.0"
-        configuration["port"] = 25565
-        configuration["protocol"] = 2
-        configuration["motd"] = {}
-        configuration["motd"]["1"] = "§4Maintenance!"
-        configuration["motd"]["2"] = "§aCheck example.com for more information!"
-        configuration["version_text"] = "§4Maintenance"
-        configuration["kick_message"] = ["§bSorry", "", "§aThis server is offline!"]
-        configuration["server_icon"] = "server_icon.png"
-        configuration["samples"] = ["§bexample.com", "", "§4Maintenance"]
-        configuration["show_ip_if_hostname_available"] = True
-        configuration["player_max"] = 0
-        configuration["player_online"] = 0
-
-        with open("config.json", 'w') as file:
-            json.dump(configuration, file, sort_keys=True, indent=4, ensure_ascii=False)
-        logger.info("Please adjust the settings in the config.json!")
-        exit(1)
+            self.logger.exception(e)
 
 
-if __name__ == '__main__':
-    main()
+# * Example usage:
+# if __name__ == '__main__':
+#     server = FakeMCServer(
+#         motd={"1": "§4Testing!", "2": "§aCheck example.com for more information!"},)
+#     server.start_server()
